@@ -1,13 +1,60 @@
-from dash import Dash, html, dcc, callback, Output, Input
 import plotly.express as px
 import pandas as pd
 
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
+from dash import Dash, html, dcc, callback, Output, Input
 
-def get_app():
+from .components import create_dropdown, create_barchart
+
+
+def get_app(df: pd.DataFrame) -> Dash:
+
+    # Initialize the app
     app = Dash()
 
+    # App layout
     app.layout = [
-        html.H1(children='Title of Dash App', style={'textAlign':'center'}),
+        html.Div(html.H1(children='Superstore Sales Analysis', style={'textAlign': 'center'}),
+                 style={'background-color': '#133E87',
+                        'color': '#F3F3E0',
+                        'padding': 10,
+                        'border-radius': 8}),
+        create_dropdown(df['Category'].unique(),
+                        'Select category',
+                        'category'),
+        create_barchart('category')
     ]
     return app
+
+
+class Controller:
+    """
+    Adds controls to build the interaction
+
+    ...
+    Attributes
+    ----------
+       
+    Methods
+    -------
+        add_callbacks()
+        update_error_graph()
+
+    """
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.df = df
+    
+    def add_callbacks(self, app: Dash):
+        """Adds callbacks to different parts of the app
+        Args:
+            app: Dash app
+        """
+        @app.callback(
+            Output(component_id='category-barchart', component_property='figure'),
+            Input(component_id='category-dropdown', component_property='value')
+        )
+        def update_graph(*col_chosen):
+            print(col_chosen)
+            partition = self.df[self.df['Category'].isin(col_chosen[0])]
+            print(partition.head())
+            fig = px.histogram(partition, x='Segment', y='Sales', histfunc='avg')
+            return fig
