@@ -1,0 +1,13 @@
+.first-overview-subsection{
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 1.8rem;
+    color: #133E87;
+}
+
+.total-boxes{
+    background-color: #CBDCEB;
+    border: 1px solid #133E87;
+    border-radius: .5rem;
+    padding: 2rem 4rem;
+}

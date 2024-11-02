@@ -5,6 +5,7 @@ import pandas as pd
 from dash import Dash, html, dcc, callback, Output, Input
 
 from .components import create_dropdown, create_barchart
+from .sections import create_overview_section
 
 
 def get_app(df: pd.DataFrame) -> Dash:
@@ -47,14 +48,16 @@ def get_app(df: pd.DataFrame) -> Dash:
                          ],
                         style={'background-color': '#133E87',
                                'height': '100vh',
-                               'border-radius': '0.5rem',})
+                               'border-radius': '0.5rem',
+                               'padding': '2rem'})
             ], span=3),
 
             dmc.Col([
                 html.Div([],
                          style={'background-color': '#F3F3E0',
                                 'height': '100vh',
-                                'border-radius': '0.5rem'},
+                                'border-radius': '0.5rem',
+                                'padding': '2rem'},
                          id='tabs-content')
             ], span='auto'),
         ]),
@@ -102,10 +105,11 @@ class Controller:
             Output(component_id='tabs-content', component_property='children'),
             Input(component_id='tabs', component_property='value')
         )
-        def update_graph(tab):
+        def update_tab_contents(tab):
             if tab == 'tab-overview':
                 return html.Div([
-                    html.H3('tab overview')
+                    html.H3('tab overview'),
+                    create_overview_section(self.df)
                 ])
             elif tab == 'tab-region':
                 return html.Div([
