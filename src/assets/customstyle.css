@@ -1,0 +1,28 @@
+#layout-content .custom-tab {
+    background-color: #133E87;
+    width: 100%;
+    border: 0;
+    color: #F3F3E0;
+    font-size: 1.5rem;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+#layout-content .custom-tab--selected{
+    background-color: #608BC1;
+    width: 100%;
+    border: 0;
+    color: #F3F3E0;
+    font-size: 1.5rem;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+#layout-content .tabs{
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    justify-content: space-evenly;
+    justify-items: center;
+}
