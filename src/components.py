@@ -1,5 +1,5 @@
+import plotly.express as px
 from typing import Any, Dict, Hashable, List
-
 from dash import dash_table, dcc, html
 
 
@@ -36,7 +36,7 @@ def create_dropdown(options: List,
     )
 
 
-def create_barchart(id_prefix: str,) -> html.Div:
+def create_chart(id_prefix: str) -> html.Div:
     return html.Div(
-        children=[dcc.Graph(figure={}, id='{}-barchart'.format(id_prefix))]
+        children=[dcc.Graph(figure={}, id='{}-chart'.format(id_prefix))]
     )

@@ -3,6 +3,7 @@
     justify-content: space-evenly;
     font-size: 1.8rem;
     color: #133E87;
+    margin: 2rem 4rem;
 }
 
 .total-boxes{
@@ -10,4 +11,14 @@
     border: 1px solid #133E87;
     border-radius: .5rem;
     padding: 2rem 4rem;
+}
+
+.display-none{
+    display: none;
+    visibility: hidden;
+}
+
+.display-inlineblock{
+    display: inline-block;
+    visibility: visible;
 }

@@ -1,17 +1,17 @@
 import dash_mantine_components as dmc
+import numpy as np
 import plotly.express as px
 import pandas as pd
 
 from dash import Dash, html, dcc, callback, Output, Input
 
-from .components import create_dropdown, create_barchart
+from .components import create_dropdown, create_chart
 from .sections import create_overview_section
 
 
 def get_app(df: pd.DataFrame) -> Dash:
-
     # Initialize the app
-    app = Dash(__name__, serve_locally=True)
+    app = Dash(__name__, serve_locally=True, suppress_callback_exceptions=True)
 
     # App layout
     app.layout = html.Div([
@@ -53,7 +53,7 @@ def get_app(df: pd.DataFrame) -> Dash:
             ], span=3),
 
             dmc.Col([
-                html.Div([],
+                html.Div(children=[],
                          style={'background-color': '#F3F3E0',
                                 'height': '100vh',
                                 'border-radius': '0.5rem',
@@ -64,7 +64,7 @@ def get_app(df: pd.DataFrame) -> Dash:
         create_dropdown(df['Category'].unique(),
                         'Select category',
                         'category'),
-        create_barchart('category')], id="layout-content")
+        create_chart('category')], id="layout-content")
     return app
 
 
@@ -91,7 +91,7 @@ class Controller:
             app: Dash app
         """
         @app.callback(
-            Output(component_id='category-barchart', component_property='figure'),
+            Output(component_id='category-chart', component_property='figure'),
             Input(component_id='category-dropdown', component_property='value')
         )
         def update_graph(*col_chosen):
@@ -101,16 +101,17 @@ class Controller:
             fig = px.histogram(partition, x='Segment', y='Sales', histfunc='avg')
             return fig
         
+        # Chang the content based on the selected tab
         @app.callback(
             Output(component_id='tabs-content', component_property='children'),
             Input(component_id='tabs', component_property='value')
         )
         def update_tab_contents(tab):
             if tab == 'tab-overview':
-                return html.Div([
-                    html.H3('tab overview'),
-                    create_overview_section(self.df)
-                ])
+                overview_content = html.Div([
+                                html.Div(create_overview_section(self.df))
+                            ], id='overview-content')
+                return overview_content
             elif tab == 'tab-region':
                 return html.Div([
                     html.H3('tab region')
@@ -123,3 +124,22 @@ class Controller:
                 return html.Div([
                     html.H3('tab category')
                 ])
+
+        # Overview tab, linechart callbacks
+        @app.callback(
+            Output(component_id='sales-city-chart', component_property='figure'),
+            Input(component_id='city-dropdown', component_property='value')
+        )
+        def update_sales_city(*col_chosen):
+            print(col_chosen)
+            partition = self.df.groupby(['Order_Date', 'City'], as_index=False)['Sales'].sum()
+            partition = partition[partition['City'].isin(col_chosen[0])]
+            print('partition = ', partition)
+            fig = px.line(partition,
+                        x="Order_Date",
+                        y="Sales",
+                        color="City",
+                        hover_name="City",
+                        line_shape="spline",
+                        render_mode="svg")
+            return fig
