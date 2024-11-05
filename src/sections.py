@@ -25,3 +25,18 @@ def create_overview_section(df: pd.DataFrame) -> list[html.Div]:
                                   create_chart('sales-city')])
         
     return [first_subsection, second_subsection]
+
+
+def create_segment_section(df: pd.DataFrame) -> list[html.Div]:
+    first_subsection = html.Div([
+        html.Div([html.H4('Segment Shares'),
+                  create_chart('segment-category-pie'),
+                  create_dropdown(df['Category'].unique(),
+                                  'Select category',
+                                  'category-segment'),],
+                 className='total-boxes'),
+    ], )
+
+    second_subsection = html.Div([])
+        
+    return [first_subsection, second_subsection]

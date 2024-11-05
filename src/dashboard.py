@@ -6,7 +6,7 @@ import pandas as pd
 from dash import Dash, html, dcc, callback, Output, Input
 
 from .components import create_dropdown, create_chart
-from .sections import create_overview_section
+from .sections import create_overview_section, create_segment_section
 
 
 def get_app(df: pd.DataFrame) -> Dash:
@@ -95,9 +95,9 @@ class Controller:
             Input(component_id='category-dropdown', component_property='value')
         )
         def update_graph(*col_chosen):
-            print(col_chosen)
+            # print(col_chosen)
             partition = self.df[self.df['Category'].isin(col_chosen[0])]
-            print(partition.head())
+            # print(partition.head())
             fig = px.histogram(partition, x='Segment', y='Sales', histfunc='avg')
             return fig
         
@@ -117,9 +117,10 @@ class Controller:
                     html.H3('tab region')
                 ])
             elif tab == 'tab-segment':
-                return html.Div([
-                    html.H3('tab segment')
-                ])
+                segment_content = html.Div([
+                                html.Div(create_segment_section(self.df))
+                            ])
+                return segment_content
             elif tab == 'tab-category':
                 return html.Div([
                     html.H3('tab category')
@@ -131,10 +132,10 @@ class Controller:
             Input(component_id='city-dropdown', component_property='value')
         )
         def update_sales_city(*col_chosen):
-            print(col_chosen)
+            # print(col_chosen)
             partition = self.df.groupby(['Order_Date', 'City'], as_index=False)['Sales'].sum()
             partition = partition[partition['City'].isin(col_chosen[0])]
-            print('partition = ', partition)
+            # print('partition = ', partition)
             fig = px.line(partition,
                         x="Order_Date",
                         y="Sales",
@@ -142,4 +143,19 @@ class Controller:
                         hover_name="City",
                         line_shape="spline",
                         render_mode="svg")
+            return fig
+
+        # Segment tab, piechart callbacks
+        @app.callback(
+            Output(component_id='segment-category-pie-chart', component_property='figure'),
+            Input(component_id='category-segment-dropdown', component_property='value')
+        )
+        def update_segment_category(*col_chosen):
+            # print(col_chosen)
+            # partition = self.df.groupby(['Segment'], as_index=False)[['Row_ID', 'Category']].count()
+            partition = self.df[self.df['Category'].isin(col_chosen[0])]
+            # print('partition = ', partition)
+            fig = px.pie(self.df,
+                         names=partition['Segment'],
+                         hole=.3)
             return fig
