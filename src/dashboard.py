@@ -5,8 +5,8 @@ import pandas as pd
 
 from dash import Dash, html, dcc, callback, Output, Input
 
-from .components import create_dropdown, create_chart
 from .sections import create_overview_section, create_segment_section
+from .utils import get_color_palette
 
 
 def get_app(df: pd.DataFrame) -> Dash:
@@ -61,10 +61,7 @@ def get_app(df: pd.DataFrame) -> Dash:
                          id='tabs-content')
             ], span='auto'),
         ]),
-        create_dropdown(df['Category'].unique(),
-                        'Select category',
-                        'category'),
-        create_chart('category')], id="layout-content")
+        ], id="layout-content")
     return app
 
 
@@ -145,17 +142,59 @@ class Controller:
                         render_mode="svg")
             return fig
 
-        # Segment tab, piechart callbacks
+        # Segment tab, first row callbacks
         @app.callback(
-            Output(component_id='segment-category-pie-chart', component_property='figure'),
+            [Output(component_id='segment-category-pie-chart', component_property='figure'),
+             Output(component_id='sales-segment-category-chart', component_property='figure'),],
             Input(component_id='category-segment-dropdown', component_property='value')
         )
         def update_segment_category(*col_chosen):
             # print(col_chosen)
             # partition = self.df.groupby(['Segment'], as_index=False)[['Row_ID', 'Category']].count()
+            color_palette1 = pd.Series(get_color_palette(self.df['Segment'].unique()))
             partition = self.df[self.df['Category'].isin(col_chosen[0])]
             # print('partition = ', partition)
-            fig = px.pie(self.df,
+            fig1 = px.pie(self.df,
                          names=partition['Segment'],
-                         hole=.3)
-            return fig
+                         hole=.3,
+                         color_discrete_sequence=color_palette1)
+            fig1.update_layout(title="Segment Shares for selected categories",)
+            partition = partition.groupby(['Month', 'Segment'], as_index=False)['Sales'].sum()
+            fig2 = px.line(partition,
+                        x="Month",
+                        y="Sales",
+                        color="Segment",
+                        hover_name="Segment",
+                        line_shape="spline",
+                        render_mode="svg")
+            fig2.update_layout(title="Segment Sales for selected categories",)
+            return fig1, fig2
+        
+        # Segment tab, second row callbacks
+        @app.callback(
+            [Output(component_id='segment-shipmode-count-chart', component_property='figure'),
+             Output(component_id='sales-segment-shipmode-chart', component_property='figure'),],
+            Input(component_id='shipmode-segment-dropdown', component_property='value')
+        )
+        def update_segment_shipmode(*col_chosen):
+            color_palette1 = get_color_palette(self.df['Ship_Mode'].unique())
+            partition = self.df[self.df['Ship_Mode'].isin(col_chosen[0])]
+            partition1 = partition.groupby(by=["Segment", "Ship_Mode"]).size().reset_index(name="counts")
+            fig1 = px.bar(data_frame=partition1,
+                          x="Segment",
+                          y="counts",
+                          color="Ship_Mode",
+                          barmode="group",
+                          color_discrete_map=color_palette1)
+            fig1.update_layout(title="Segment Shares for selected ship modes",)
+            partition2 = partition.groupby(['Month', 'Segment'], as_index=False)['Sales'].sum()
+            fig2 = px.line(partition2,
+                        x="Month",
+                        y="Sales",
+                        color="Segment",
+                        hover_name="Segment",
+                        line_shape="spline",
+                        render_mode="svg")
+            fig2.update_layout(title="Segment Sales for selected ship modes",)
+            return fig1, fig2
+

@@ -1,3 +1,4 @@
+import dash_mantine_components as dmc
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -28,15 +29,28 @@ def create_overview_section(df: pd.DataFrame) -> list[html.Div]:
 
 
 def create_segment_section(df: pd.DataFrame) -> list[html.Div]:
-    first_subsection = html.Div([
-        html.Div([html.H4('Segment Shares'),
-                  create_chart('segment-category-pie'),
-                  create_dropdown(df['Category'].unique(),
+    first_subsection = html.Div(create_dropdown(df['Category'].unique(),
                                   'Select category',
-                                  'category-segment'),],
-                 className='total-boxes'),
-    ], )
-
-    second_subsection = html.Div([])
+                                  'category-segment'))
+    second_subsection = dmc.Grid([
+            dmc.Col(create_chart('segment-category-pie'),
+                    className='segment-charts',
+                    span=4),
+            dmc.Col(create_chart('sales-segment-category'),
+                    className='segment-charts',
+                    span='auto'),
+    ], className='segment-subsection')
+    third_subsection = html.Div(create_dropdown(df['Ship_Mode'].unique(),
+                                  'Select ship Mode',
+                                  'shipmode-segment'))
+    forth_subsection = dmc.Grid([
+            dmc.Col(create_chart('segment-shipmode-count'),
+                    className='segment-charts',
+                    span=4),
+            dmc.Col(create_chart('sales-segment-shipmode'),
+                    className='segment-charts',
+                    span='auto'),
+    ], className='segment-subsection')
+    
         
-    return [first_subsection, second_subsection]
+    return [first_subsection, second_subsection, third_subsection, forth_subsection]
