@@ -5,7 +5,9 @@ from dash import dash_table, dcc, html
 
 def create_dropdown(options: List,
                     label: str,
-                    id_prefix: str,) -> html.Div:
+                    id_prefix: str,
+                    multi: bool = True,
+                    value: str = None) -> html.Div:
     """Creates a good-looking dropdown
 
     Args:
@@ -17,6 +19,8 @@ def create_dropdown(options: List,
     Returns:
         html.Div to put in the ``app.layout``
     """
+    if not value:
+        value=[options[0]]
     return html.Div(
         children=[
             html.Label(
@@ -26,17 +30,51 @@ def create_dropdown(options: List,
             dcc.Dropdown(
                 options=options,
                 id=f"{id_prefix}-dropdown",
-                value=[options[0]],
+                value=value,
                 searchable=False,
                 clearable=False,
-                multi=True
+                multi=multi
             ),
         ],
         style={"padding": 10, "flex": 1},
     )
 
 
-def create_chart(id_prefix: str) -> html.Div:
+def create_chart(id_prefix: str, style: dict = None) -> html.Div:
     return html.Div(
-        children=[dcc.Graph(figure={}, id='{}-chart'.format(id_prefix))]
+        children=[dcc.Graph(figure={}, id='{}-chart'.format(id_prefix), style=style),],
+                            style={'height': '40vh'}
+    )
+
+
+def create_radioitem(options: List,
+                    label: str,
+                    id_prefix: str,) -> html.Div:
+    """Creates a good-looking radio item
+
+    Args:
+        options: RadioItems's options
+        label: RadioItems's label
+        id_prefix: will be used in RadioItems's id -> id of the RadioItems
+        component will be {id_prefix}-radioitem
+
+    Returns:
+        html.Div to put in the ``app.layout``
+    """
+    return html.Div(
+        children=[
+            html.Label(
+                label,
+                id=f"{id_prefix}-label",
+                style={'font-weight': 'bold',
+                       'font-size': '1.3rem',
+                       'margin-bottom': '1.5rem'}
+            ),
+            dcc.RadioItems(
+                options=options,
+                id=f"{id_prefix}-radioitem",
+                value=options[0],
+            ),
+        ],
+        className=f"{id_prefix}-radioitem",
     )
