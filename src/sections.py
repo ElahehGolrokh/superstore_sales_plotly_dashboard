@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import html
 
-from .components import create_dropdown, create_chart, create_radioitem
+from .components import create_dropdown, create_chart, create_radioitem, create_checklist
 
 def create_overview_section(df: pd.DataFrame) -> list[html.Div]:
     total_customers = len(df['Customer_ID'].unique())
@@ -91,3 +91,50 @@ def create_category_section(df: pd.DataFrame) -> list[html.Div]:
     
         
     return [first_subsection, second_subsection]
+
+
+def create_region_section(df: pd.DataFrame) -> list[html.Div]:
+
+    first_subsection = dmc.Grid([
+        dmc.Col(create_checklist(df['Region'].unique(),
+                                  'Select region:',
+                                  'region-region'),
+                    span=2),
+        dmc.Col(create_chart('region-region-pie',
+                                  style={'height': '90%'}),
+                    className='region-charts',
+                    span=4),
+        dmc.Col(create_chart('sales-region-region',
+                                  style={'height': '90%'}),
+                    className='region-charts',
+                    span='auto'),
+    ], className='region-subsection')
+    second_subsection = dmc.Grid([
+            dmc.Col(create_chart('subregion-sales',
+                                 style={'height': '90%'},
+                                 figure=create_region_sales_figure(df)),
+                    className='region-charts',
+                    span=6),
+            dmc.Col(create_chart('region-shipmode-segment',
+                                 style={'height': '90%'}),
+                    className='region-charts',
+                    span='auto'),
+    ], className='region-subsection')
+    
+        
+    return [first_subsection, second_subsection]
+
+
+def create_region_sales_figure(df: pd.DataFrame) -> list[html.Div]:
+    sales = []
+    for region in df['Region'].unique():
+        sales.append(int(df[df['Region']==region]['Sales'].sum()/1000))
+    df = df.groupby('Region', as_index=False)['Sales'].sum()
+    region_sales_figure = px.bar(df,
+                    y='Region',
+                    x='Sales',
+                    text='Sales',
+                    color_discrete_sequence=px.colors.sequential.Viridis)
+    region_sales_figure.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    region_sales_figure.update_layout(title=f"Sales of each sub_category for",)
+    return region_sales_figure
