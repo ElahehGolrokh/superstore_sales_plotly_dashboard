@@ -5,29 +5,68 @@ import plotly.express as px
 
 from dash import html
 
-from .components import create_dropdown, create_chart, create_radioitem, create_checklist
+from .components import create_dropdown, create_chart, create_radioitem, create_checklist, create_total_sales_figure, create_barchart_withsales
+from .utils import get_color_palette
+
 
 def create_overview_section(df: pd.DataFrame) -> list[html.Div]:
     total_customers = len(df['Customer_ID'].unique())
     total_products = len(df['Product_ID'])
+    total_orders = len(df['Order_ID'])
     total_sales = np.round(df['Sales'].sum()/1000000)
     first_subsection = html.Div([
         html.Div([f'Total Customers = {total_customers}'],
                  className='total-boxes'),
         html.Div([f'Total Products = {total_products}'],
                  className='total-boxes'),
+        html.Div([f'Total Orders = {total_orders}'],
+                 className='total-boxes'),
         html.Div([f'Total Sales = {total_sales}M $'],
                  className='total-boxes'),
     ], className='first-overview-subsection')
 
-    second_subsection = html.Div([create_dropdown(df['State'].unique(),
-                                                  'Select state',
-                                                  'state',
-                                                  multi=False,
-                                                  value=df['State'].unique()[0]),
-                                  create_chart('sales-state')])
+    color_palette = pd.Series(get_color_palette(df['Category'].unique()))
+
+    second_subsection = dmc.Grid([
+            dmc.Col(create_chart('overview-category-sales',
+                                 style={'height': '90%'},
+                                 figure=create_barchart_withsales(df,
+                                                                  grouped_col='Category',
+                                                                  title="Sales of each category",
+                                                                  partitioning=False,
+                                                                  color_palette=color_palette)),
+                    className='charts',
+                    span=6),
+            dmc.Col(create_chart('overview-total-sales',
+                                  style={'height': '90%'},
+                                  figure=create_total_sales_figure(df,
+                                                                   title='Total Sales')),
+                    className='charts',
+                    span='auto'),
+    ], className='category-subsection')
+
+    third_subsection = dmc.Grid([
+            dmc.Col(create_chart('overview-segment-sales',
+                                 style={'height': '90%'},
+                                 figure=create_barchart_withsales(df,
+                                                                  grouped_col='Segment',
+                                                                  title="Sales of each segment",
+                                                                  partitioning=False,
+                                                                  color_palette=color_palette)),
+                    className='charts',
+                    span=6),
+            dmc.Col(create_chart('overview-shipmode-sales',
+                                  style={'height': '90%'},
+                                  figure=create_barchart_withsales(df,
+                                                                  grouped_col='Ship_Mode',
+                                                                  title="Sales of each ship mode",
+                                                                  partitioning=False,
+                                                                  color_palette=color_palette),),
+                    className='charts',
+                    span='auto'),
+    ], className='category-subsection')
         
-    return [first_subsection, second_subsection]
+    return [first_subsection, second_subsection, third_subsection]
 
 
 def create_segment_section(df: pd.DataFrame) -> list[html.Div]:
@@ -37,28 +76,26 @@ def create_segment_section(df: pd.DataFrame) -> list[html.Div]:
     second_subsection = dmc.Grid([
             dmc.Col(create_chart('segment-category-pie',
                                   style={'height': '90%'}),
-                    className='segment-charts',
+                    className='charts',
                     span=4),
             dmc.Col(create_chart('sales-segment-category',
                                   style={'height': '90%'}),
-                    className='segment-charts',
+                    className='charts',
                     span='auto'),
-    ], className='segment-subsection')
+    ])
     third_subsection = html.Div(create_dropdown(df['Ship_Mode'].unique(),
                                   'Select ship Mode',
                                   'shipmode-segment'))
     forth_subsection = dmc.Grid([
             dmc.Col(create_chart('segment-shipmode-count',
                                  style={'height': '90%'}),
-                    className='segment-charts',
+                    className='charts',
                     span=4),
             dmc.Col(create_chart('sales-segment-shipmode',
                                  style={'height': '90%'}),
-                    className='segment-charts',
+                    className='charts',
                     span='auto'),
-    ], className='segment-subsection')
-    
-        
+    ])       
     return [first_subsection, second_subsection, third_subsection, forth_subsection]
 
 
@@ -71,25 +108,23 @@ def create_category_section(df: pd.DataFrame) -> list[html.Div]:
                     span=2),
         dmc.Col(create_chart('category-category-pie',
                                   style={'height': '90%'}),
-                    className='category-charts',
+                    className='charts',
                     span=4),
         dmc.Col(create_chart('sales-category-category',
                                   style={'height': '90%'}),
-                    className='category-charts',
+                    className='charts',
                     span='auto'),
     ], className='category-subsection')
     second_subsection = dmc.Grid([
             dmc.Col(create_chart('subcategory-sales',
                                  style={'height': '90%'}),
-                    className='category-charts',
+                    className='charts',
                     span=6),
             dmc.Col(create_chart('category-shipmode-segment',
                                  style={'height': '90%'}),
-                    className='category-charts',
+                    className='charts',
                     span='auto'),
     ], className='category-subsection')
-    
-        
     return [first_subsection, second_subsection]
 
 
@@ -102,39 +137,25 @@ def create_region_section(df: pd.DataFrame) -> list[html.Div]:
                     span=2),
         dmc.Col(create_chart('region-region-pie',
                                   style={'height': '90%'}),
-                    className='region-charts',
+                    className='charts',
                     span=4),
         dmc.Col(create_chart('sales-region-region',
                                   style={'height': '90%'}),
-                    className='region-charts',
+                    className='charts',
                     span='auto'),
     ], className='region-subsection')
     second_subsection = dmc.Grid([
             dmc.Col(create_chart('subregion-sales',
                                  style={'height': '90%'},
-                                 figure=create_region_sales_figure(df)),
-                    className='region-charts',
+                                 figure=create_barchart_withsales(df,
+                                                                  grouped_col='Region',
+                                                                  title="Sales of each region",
+                                                                  partitioning=False)),
+                    className='charts',
                     span=6),
             dmc.Col(create_chart('region-shipmode-segment',
                                  style={'height': '90%'}),
-                    className='region-charts',
+                    className='charts',
                     span='auto'),
-    ], className='region-subsection')
-    
-        
+    ], className='region-subsection')    
     return [first_subsection, second_subsection]
-
-
-def create_region_sales_figure(df: pd.DataFrame) -> list[html.Div]:
-    sales = []
-    for region in df['Region'].unique():
-        sales.append(int(df[df['Region']==region]['Sales'].sum()/1000))
-    df = df.groupby('Region', as_index=False)['Sales'].sum()
-    region_sales_figure = px.bar(df,
-                    y='Region',
-                    x='Sales',
-                    text='Sales',
-                    color_discrete_sequence=px.colors.sequential.Viridis)
-    region_sales_figure.update_traces(texttemplate='%{text:.2s}', textposition='outside')
-    region_sales_figure.update_layout(title=f"Sales of each sub_category for",)
-    return region_sales_figure

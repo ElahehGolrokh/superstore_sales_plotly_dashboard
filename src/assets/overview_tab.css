@@ -1,7 +1,7 @@
 .first-overview-subsection{
     display: flex;
     justify-content: space-evenly;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     color: #133E87;
     margin: 2rem 4rem;
 }
@@ -10,5 +10,5 @@
     background-color: #CBDCEB;
     border: 1px solid #133E87;
     border-radius: .5rem;
-    padding: 2rem 4rem;
+    padding: 1.8rem 2.8rem;
 }

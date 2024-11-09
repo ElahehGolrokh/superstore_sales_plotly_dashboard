@@ -1,4 +1,6 @@
-from typing import Any, Dict, Hashable, List
+import pandas as pd
+import plotly.express as px
+from typing import Any, Dict, Hashable, List, Union
 from dash import dcc, html
 
 
@@ -77,7 +79,7 @@ def create_radioitem(options: List,
                 value=options[0],
             ),
         ],
-        className=f"{id_prefix}-radioitem",
+        className="custom-radioitem",
     )
 
 
@@ -110,5 +112,116 @@ def create_checklist(options: List,
                 value=[options[0]],
             ),
         ],
-        className=f"{id_prefix}-checklist",
+        className="custom-checklist",
     )
+
+
+def create_total_sales_figure(df: pd.DataFrame,
+                              title: str,
+                              col: str = None,
+                              col_chosen: Union[str, List] = None,
+                              partitioning: bool = False) -> list[html.Div]:
+    """
+    Creates line chart of monthly sales in each year for the specified
+    df or a part of it.
+    """
+    if partitioning:
+        if type (col_chosen) is list :
+            partition = df[df[col].isin(col_chosen)]
+        else:
+            partition = df[df[col]==col_chosen]
+    else:
+        partition = df.copy()
+    partition = partition.groupby(['Year', 'Month'], as_index=False)['Sales'].sum()
+    fig = px.line(partition,
+                x="Month",
+                y="Sales",
+                color="Year",
+                hover_name="Year",
+                line_shape="spline",
+                render_mode="svg",
+                markers=True)
+    fig.update_layout(title=title)
+    return fig
+
+
+def create_group_barcharts(df: pd.DataFrame,
+                           grouped_cols: List,
+                           title: str,
+                           col: str = None,
+                           col_chosen: Union[str, List] = None,
+                           partitioning: bool = True,
+                           color_palette: dict = None) -> list[html.Div]:
+    """
+    Creates grouped bar chart.
+    """
+    if partitioning:
+        if type (col_chosen) is list :
+            partition = df[df[col].isin(col_chosen)]
+        else:
+            partition = df[df[col]==col_chosen]
+    else:
+        partition = df.copy()
+    partition = partition.groupby(grouped_cols).size().reset_index(name="counts")
+    fig = px.bar(data_frame=partition,
+                    x="Segment",
+                    y="counts",
+                    color="Ship_Mode",
+                    barmode="group",
+                    color_discrete_map=color_palette)
+    fig.update_layout(title=title)
+    return fig
+
+
+def create_barchart_withsales(df: pd.DataFrame,
+                              grouped_col: List,
+                              title: str,
+                              color_palette: Union[List, pd.Series] = px.colors.sequential.Viridis,
+                              col: str = None,
+                              col_chosen: str = None,
+                              partitioning: bool = True,) -> list[html.Div]:
+    """
+    Creates bar chart with specifying sales of each bar
+    """
+    if partitioning:
+        partition = df[df[col]==col_chosen]
+    else:
+        partition = df.copy()
+    sales = []
+    for el in partition[grouped_col].unique():
+        sales.append(int(partition[partition[grouped_col]==el]['Sales'].sum()/1000))
+    partition = partition.groupby(grouped_col, as_index=False)['Sales'].sum()
+    fig = px.bar(partition,
+                 y=grouped_col,
+                 x='Sales',
+                 text='Sales',
+                 color_discrete_sequence=color_palette)
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(title=title)
+    return fig
+
+
+def create_piechart(df: pd.DataFrame,
+                    names: str,
+                    title: str,
+                    color_palette: Union[List, pd.Series],
+                    col: str = None,
+                    col_chosen: Union[str, List] = None,
+                    partitioning: bool = True,
+                    hole: float = 0) -> list[html.Div]:
+    """
+    Creates pie chart
+    """
+    if partitioning:
+        if type(col_chosen) is list :
+            partition = df[df[col].isin(col_chosen)]
+        else:
+            partition = df[df[col]==col_chosen]
+    else:
+        partition = df.copy()
+    fig = px.pie(partition,
+                 names=partition[names],
+                 hole=hole,
+                 color_discrete_sequence=color_palette,
+                 title=title)
+    return fig

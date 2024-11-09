@@ -28,3 +28,30 @@
     justify-content: space-evenly;
     justify-items: center;
 }
+
+.charts{
+    background-color: #CBDCEB;
+    border: 1px solid #133E87;
+    border-radius: .5rem;
+    margin-bottom: 1rem;
+}
+
+.custom-radioitem{
+    display: flex;
+    height: 80%;
+    flex-direction: column;
+    justify-content: center;
+    color: #133E87;
+    font-size: 1.2rem;
+    line-height: 2rem;
+}
+
+.custom-checklist{
+    display: flex;
+    height: 80%;
+    flex-direction: column;
+    justify-content: center;
+    color: #133E87;
+    font-size: 1.2rem;
+    line-height: 2rem;
+}
