@@ -2,29 +2,41 @@ import pandas as pd
 
 
 def clean(df: pd.DataFrame) -> pd.DataFrame:
-    """Removes  nans and not informative columns from pandas dataframe"""
+    """
+    Cleans the input dataframe. These steps are as follows:
+        - Removing not informative columns
+        - Removing nans
+        - Removing outliers
+        - Handling date format for Order_Date column
+        - Handling state abbreviations which is used in the px.choropleth map
+    """
     df.drop(['Country', 'Customer_Name'], axis=1, inplace=True)
     df.dropna(inplace=True)
 
     # Removing outliers
     df = df[df['Sales'] <= df['Sales'].quantile(0.99)]
+
+    # Handling datetime
     df['Order_Date'] = pd.to_datetime(df['Order_Date'], format='%d/%m/%Y')
     df['Month'] = df['Order_Date'].apply(lambda x: x.month)
     df['Year'] = df['Order_Date'].apply(lambda x: x.year)
 
     # Dictionary for full state names to abbreviations
     state_abbrev = {
-        'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
-        'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'District of Columbia': 'DC',
-        'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL',
-        'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA',
-        'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN',
-        'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
-        'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
-        'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR',
-        'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD',
-        'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA',
-        'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+        'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR',
+        'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT',
+        'Delaware': 'DE', 'District of Columbia': 'DC', 'Florida': 'FL',
+        'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL',
+        'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS', 'Kentucky': 'KY',
+        'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA',
+        'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
+        'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH',
+        'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC',
+        'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 'Oregon': 'OR',
+        'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+        'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT',
+        'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV',
+        'Wisconsin': 'WI', 'Wyoming': 'WY'
     }
 
     # Add a new column with state abbreviations
@@ -38,6 +50,13 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_color_palette(*items: list) -> dict:
+    """
+    Returns a color palette which can be used in the charts
+
+    Args:
+        items: a list of unique values in the target column of
+        the dataframe
+    """
     color_discrete_map = dict()
     colors = ['#133E87', '#608BC1', '#088395', '#003161']
     for i, item in enumerate(*items):
