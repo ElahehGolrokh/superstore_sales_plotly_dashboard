@@ -6,7 +6,8 @@ from src.utils import clean
 
 def main():
     # Incorporate data
-    df = pd.read_csv('data/superstore_final_dataset (1).csv',
+    data_path = 'data/superstore_final_dataset (1).csv'
+    df = pd.read_csv(data_path,
                      encoding='latin-1')
     df = clean(df)
     app = get_app()
