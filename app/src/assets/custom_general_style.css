@@ -1,0 +1,57 @@
+/* General styles */
+#layout-content .custom-tab {
+    background-color: #133E87;
+    width: 100%;
+    border: 0;
+    color: #F3F3E0;
+    font-size: 1.5rem;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+#layout-content .custom-tab--selected{
+    background-color: #608BC1;
+    width: 100%;
+    border: 0;
+    color: #F3F3E0;
+    font-size: 1.6rem;
+    font-weight: bold;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+#layout-content .tabs{
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    justify-content: space-evenly;
+    justify-items: center;
+}
+
+.charts{
+    background-color: #CBDCEB;
+    border: 1px solid #133E87;
+    border-radius: .5rem;
+    margin-bottom: 1rem;
+}
+
+.custom-radioitem{
+    display: flex;
+    height: 80%;
+    flex-direction: column;
+    justify-content: center;
+    color: #133E87;
+    font-size: 1.2rem;
+    line-height: 2rem;
+}
+
+.custom-checklist{
+    display: flex;
+    height: 80%;
+    flex-direction: column;
+    justify-content: center;
+    color: #133E87;
+    font-size: 1.2rem;
+    line-height: 2rem;
+}
