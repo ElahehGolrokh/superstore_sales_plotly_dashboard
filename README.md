@@ -2,6 +2,8 @@
 This project involves analyzing superstore sales data and visualizing the results through an engaging, interactive Plotly dashboard.
 
 ![dashboard](dashboard.png)
+<br>
+To see deployed dashboard, click <a href="https://superstore-sales-plotly-dashboard-1.onrender.com/">here</a>. <br>
 
 ## Installation
 
